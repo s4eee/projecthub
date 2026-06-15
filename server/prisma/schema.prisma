@@ -11,3 +11,69 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+// 1. The Main Project Model
+model Project {
+  id          String      @id @default(uuid())
+  name        String
+  subtitle    String?
+  status      String      @default("PLANNING") // PLANNING, BUILDING, COMPLETE, PAUSED
+  progress    Int         @default(0)          // Percentage 0 to 100
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relationships (A project can have multiple notes, milestones, diaries, and links)
+  notes       Note[]
+  milestones  Milestone[]
+  diaries     DiaryEntry[]
+  links       ResearchLink[]
+}
+
+// 2. The Notes Model
+model Note {
+  id        String   @id @default(uuid())
+  content   String
+  color     String?  // For our pastel color coding feature!
+  createdAt DateTime @default(now())
+  
+  // Link this note to a specific project
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// 3. The Milestones Model
+model Milestone {
+  id          String   @id @default(uuid())
+  label       String
+  isCompleted Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  // Link this milestone to a specific project
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// 4. The Development Diary Model
+model DiaryEntry {
+  id        String   @id @default(uuid())
+  dateText  String   // e.g., "15 Jun"
+  text      String
+  color     String?  // For the custom diary timeline dots
+  createdAt DateTime @default(now())
+
+  // Link this diary entry to a specific project
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+// 5. The Research Links Model
+model ResearchLink {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  url         String?
+  createdAt   DateTime @default(now())
+
+  // Link this research link to a specific project
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
