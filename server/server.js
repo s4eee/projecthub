@@ -1,5 +1,9 @@
 require('dotenv').config();
+console.log("=== DATABASE ENVIRONMENT CHECK ===");
+console.log("Is DATABASE_URL visible to Node?:", process.env.DATABASE_URL ? "✅ YES" : "❌ NO (It is undefined)");
+console.log("==================================");
 const express = require('express');
+const cors = require('cors');
 const { Pool } = require('pg');                         // Added for Prisma 7
 const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');     // Added for Prisma 7
@@ -7,7 +11,7 @@ const { PrismaPg } = require('@prisma/adapter-pg');     // Added for Prisma 7
 const app = express();
 
 // 1. Set up the PostgreSQL Connection Pool
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: true});
 
 // 2. Instantiate the Prisma 7 Driver Adapter
 const adapter = new PrismaPg(pool);
@@ -63,6 +67,7 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+
+app.listen(PORT,'127.0.0.1', () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
